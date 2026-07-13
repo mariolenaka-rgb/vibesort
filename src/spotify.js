@@ -202,3 +202,48 @@ export async function createPlaylist(token, userId, name, description, trackUris
 
   return playlist;
 }
+export async function fetchUserPlaylists(token) {
+  const playlists = [];
+  let url = 'https://api.spotify.com/v1/me/playlists?limit=50';
+  while (url) {
+    const data = await apiFetch(token, url);
+    playlists.push(...(data.items || []).filter(Boolean));
+    url = data.next;
+    await sleep(150);
+  }
+  return playlists;
+}
+
+export async function fetchPlaylistTracks(token, playlistId) {
+  const tracks = [];
+  let url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=50`;
+  while (url) {
+    const data = await apiFetch(token, url);
+    tracks.push(...(data.items || []).map(i => i.track).filter(t => t?.id));
+    url = data.next;
+    await sleep(150);
+  }
+  return tracks;
+}
+
+export async function fetchAllTracks(token, onProgress) {
+  const seenIds = new Set();
+  const allTracks = [];
+
+  // 1. Liked songs
+  const liked = await fetchLikedSongs(token, () => {});
+  liked.forEach(t => { seenIds.add(t.id); allTracks.push(t); });
+  onProgress?.(allTracks.length);
+
+  // 2. Playlists
+  const playlists = await fetchUserPlaylists(token);
+  for (const pl of playlists) {
+    const tracks = await fetchPlaylistTracks(token, pl.id);
+    tracks.forEach(t => {
+      if (!seenIds.has(t.id)) { seenIds.add(t.id); allTracks.push(t); }
+    });
+    onProgress?.(allTracks.length);
+  }
+
+  return allTracks;
+}

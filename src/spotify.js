@@ -238,7 +238,7 @@ export async function fetchAllTracks(token, onProgress) {
   // 2. Playlists
   const playlists = await fetchUserPlaylists(token);
   for (const pl of playlists) {
-    const tracks = await fetchPlaylistTracks(token, pl.id);
+    const tracks = await fetchPlaylistTracks(token, pl.id).catch(() => []);
     tracks.forEach(t => {
       if (!seenIds.has(t.id)) { seenIds.add(t.id); allTracks.push(t); }
     });

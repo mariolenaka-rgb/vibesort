@@ -5,7 +5,7 @@ const CLIENT_ID = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
 const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI || window.location.origin;
 const SCOPES = [
   'user-library-read',
-  'playlist-read-private',
+  'playlist-read-private',   'playlist-read-collaborative',
   'playlist-modify-private',
   'playlist-modify-public',
 ].join(' ');
@@ -239,7 +239,7 @@ export async function fetchAllTracks(token, onProgress) {
  const me = await getCurrentUser(token);
   const playlists = await fetchUserPlaylists(token);
   for (const pl of playlists) {
-    if (pl.owner?.id !== me.id) continue;
+    if (!pl.owner?.id) continue;
     const tracks = await fetchPlaylistTracks(token, pl.id).catch(() => []);
     tracks.forEach(t => {
       if (!seenIds.has(t.id)) { seenIds.add(t.id); allTracks.push(t); }

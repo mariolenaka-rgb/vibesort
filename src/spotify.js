@@ -105,7 +105,7 @@ export async function getCurrentUser(token) {
 
 export async function fetchLikedSongs(token, onProgress) {
   const songs = [];
-  let url = 'https://api.spotify.com/v1/me/tracks?limit=50&market=ES';
+  let url = 'https://api.spotify.com/v1/me/tracks?limit=50';
 
   while (url) {
     const data = await apiFetch(token, url);

@@ -46,8 +46,8 @@ export default function App() {
     try {
       // 1. Liked Songs
       setProgress({ msg: 'Importando canciones...', loaded: 0, total: 0 });
-      const tracks = await Spotify.fetchLikedSongs(token, (loaded, total) => {
-        setProgress({ msg: `Importando canciones... ${loaded} / ${total}`, loaded, total });
+      const tracks = await Spotify.fetchAllTracks(token, (loaded) => {
+        setProgress({ msg: `Importando... ${loaded} canciones encontradas`, loaded, total: 0 });
       });
 
       // 2. Clasificar con Last.fm

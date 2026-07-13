@@ -76,28 +76,12 @@ export default function App() {
         setProgress({ msg: `Importando canciones... ${loaded} / ${total}`, loaded, total });
       });
 
-      // 2. Audio Features
-      setProgress({ msg: 'Analizando audio...', loaded: 0, total: tracks.length });
-      const trackIds = tracks.map(t => t?.id).filter(Boolean);
-      const featuresArr = await Spotify.fetchAudioFeatures(token, trackIds, (loaded) => {
-        setProgress({ msg: `Analizando audio... ${loaded} / ${tracks.length}`, loaded, total: tracks.length });
+      // 2. Clasificar con Claude (por nombre + artista, lotes de 30)
+      setProgress({ msg: 'Clasificando con IA... 0 / ' + tracks.length, loaded: 0, total: tracks.length });
+      const result = await classifyLibrary(tracks, (loaded, total) => {
+        setProgress({ msg: `Clasificando con IA... ${loaded} / ${total}`, loaded, total });
       });
 
-      // Convertir array de features → mapa por track.id
-      const featuresMap = {};
-      tracks.forEach((t, i) => {
-        if (t?.id) featuresMap[t.id] = featuresArr[i] || null;
-      });
-
-      // 3. Géneros de artistas (para categorías culturales: flamenco, disco, etc.)
-      setProgress({ msg: 'Detectando géneros musicales...', loaded: 0, total: 0 });
-      const artistIds = [...new Set(tracks.map(t => t?.artists?.[0]?.id).filter(Boolean))];
-      const genreMap = await Spotify.fetchArtistGenres(token, artistIds);
-
-      // 4. Clasificar
-      setProgress({ msg: 'Clasificando tu biblioteca...', loaded: 0, total: 0 });
-      await new Promise(r => setTimeout(r, 400)); // pausa UX
-      const result = classifyLibrary(tracks, featuresMap, genreMap);
       setClassified(result);
       setPhase('results');
 

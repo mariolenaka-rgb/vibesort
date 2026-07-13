@@ -50,17 +50,11 @@ export default function App() {
         setProgress({ msg: `Importando canciones... ${loaded} / ${total}`, loaded, total });
       });
 
-      // 2. Géneros de artistas
-      setProgress({ msg: 'Obteniendo géneros musicales...', loaded: 0, total: 0 });
-      const artistIds = [...new Set(tracks.map(t => t?.artists?.[0]?.id).filter(Boolean))];
-      const genreMap = await Spotify.fetchArtistGenres(token, artistIds, (loaded) => {
-        setProgress({ msg: `Analizando artistas... ${loaded} / ${artistIds.length}`, loaded, total: artistIds.length });
+      // 2. Clasificar con Last.fm
+      setProgress({ msg: 'Clasificando con Last.fm...', loaded: 0, total: tracks.length });
+      const result = await classifyLibrary(tracks, (loaded, total) => {
+        setProgress({ msg: `Clasificando... ${loaded} / ${total}`, loaded, total });
       });
-
-      // 3. Clasificar
-      setProgress({ msg: 'Clasificando tu biblioteca...', loaded: 0, total: 0 });
-      await new Promise(r => setTimeout(r, 300));
-      const result = classifyLibrary(tracks, genreMap);
       setClassified(result);
       setPhase('results');
     } catch (e) { setErrorMsg(e.message); setPhase('error'); }

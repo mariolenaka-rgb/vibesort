@@ -235,17 +235,5 @@ export async function fetchAllTracks(token, onProgress) {
   liked.forEach(t => { seenIds.add(t.id); allTracks.push(t); });
   onProgress?.(allTracks.length);
 
-  // 2. Playlists
- const me = await getCurrentUser(token);
-  const playlists = await fetchUserPlaylists(token);
-  for (const pl of playlists) {
-    if (!pl.owner?.id) continue;
-    const tracks = await fetchPlaylistTracks(token, pl.id).catch(() => []);
-    tracks.forEach(t => {
-      if (!seenIds.has(t.id)) { seenIds.add(t.id); allTracks.push(t); }
-    });
-    onProgress?.(allTracks.length);
-  }
-
   return allTracks;
 }
